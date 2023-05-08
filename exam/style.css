@@ -1,0 +1,39 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #A4BAB7;
+    margin-top: 50px;
+}
+
+.container {
+    background-color: #EFF2C0;
+    padding: 5px;
+}
+
+.tittel {
+    text-align: center;
+    border-bottom: solid;
+}
+
+.inventar {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    
+}
+.item {
+    padding: 5px;
+    margin-right: 10px;
+    border-bottom: solid;
+        
+}
+.item:hover {
+    background-color: #A52422;
+    color: white;
+}
+
+.knapper {
+    margin-top: 50px;
+}
