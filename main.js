@@ -22,9 +22,10 @@ app.get('/', function (req, res) {
            console.log(result);     
                          
            res.render('index.ejs', {
-              data: result
-             
-                 
+              data: result,
+              innhold: result.fornavn
+
+
          }); // render
         }); // select
    });// connect
