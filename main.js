@@ -10,7 +10,7 @@ var app = express();
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
  
-app.get('/', function (req, res) {
+app.get('/test', function (req, res) {
 
    var con = mysql.createConnection({host:"mikkel-mysql.mysql.database.azure.com", user:"mikkel", password:"1drossaP", 
    database:"spontanlaanbank", port:3306, ssl:{ca:fs.readFileSync("DigiCertGlobalRootCA.crt.pem")}});
@@ -48,19 +48,16 @@ app.use(sessions({
  
 // set the view engine to ejs
 app.set('view engine', 'ejs');
- 
-//username and password   
-const myusername = 'user1';
-const mypassword = '123';
+
  
 // a variable to save a session
 var session;
  
 app.get('/', function (req, res) {
      session=req.session;
-     if(session.userid){
-        res.render('login_index.ejs', { 
-            userid: session.userid      
+     if(session.userid){ //if already logged in
+        res.render('index.ejs', {
+            userid: session.userid
         });
  
      } 
@@ -68,7 +65,37 @@ app.get('/', function (req, res) {
         res.render('login.ejs', { });
      }
 })
+
+app.post('/login', function (req, res) {
+    var con = mysql.createConnection({host:"mikkel-mysql.mysql.database.azure.com", user:"mikkel", password:"1drossaP", 
+   database:"spontanlaanbank", port:3306, ssl:{ca:fs.readFileSync("DigiCertGlobalRootCA.crt.pem")}});
+
  
+    // hent brukernavn og passord fra skjema på login
+    var person_nr = req.body.person_nr;
+    var passord = req.body.password;
+
+    console.log(person_nr, passord)
+ 
+    // perform the MySQL query to check if the user exists
+    var sql = 'SELECT * FROM brukere WHERE person_nr = ? AND passord = ?';
+    
+    con.query(sql, [person_nr, passord], (error, results) => {
+        if (error) {
+            res.status(500).send('Internal Server Error');
+        } else if (results.length === 1) {
+            session = req.session;
+            session.userid=req.body.person_nr; // set session userid til brukernavn
+            res.redirect('/konto');
+ 
+        } else {
+            res.redirect('/login?error=invalid'); // redirect med error beskjed i GET
+        }
+    });
+});
+
+
+
 app.get('/logout', function (req, res) {
     req.session.destroy();
     res.render('login.ejs', {     
@@ -77,18 +104,24 @@ app.get('/logout', function (req, res) {
 })
 app.get('/konto', function (req, res) {
 
+    session = req.session
+
+    person_nr = session.userid
+
 
     var con = mysql.createConnection({host:"mikkel-mysql.mysql.database.azure.com", user:"mikkel", password:"1drossaP", 
     database:"spontanlaanbank", port:3306, ssl:{ca:fs.readFileSync("DigiCertGlobalRootCA.crt.pem")}});
  
      con.connect(function(err) {
          //if (err) throw err;
-         con.query("SELECT * FROM brukere", function (err, result, fields) {
+         var sql = 'SELECT * FROM brukere WHERE person_nr = ?';
+    
+         con.query(sql, [person_nr], (error, results) => {
             if (err) throw err;
-            console.log(result);     
+            console.log(results);     
                           
             res.render('konto.ejs', {
-               data: result
+               data: results
               
                   
           }); // render
@@ -96,17 +129,7 @@ app.get('/konto', function (req, res) {
     });// connect
   }) // app get
  
-app.post('/user',(req,res) => {
-    if(req.body.username == myusername && req.body.password == mypassword){
-        session=req.session;
-        session.userid=req.body.username;
-        console.log(req.session)
-        res.send(`Hey there, welcome <a href=\'/logout'>click to logout</a>`);
-    }
-    else{
-        res.send('Invalid username or password');
-    }
-})
+
  
 var server = app.listen(8081, function () {
    var host = server.address().address

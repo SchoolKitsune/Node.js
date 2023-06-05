@@ -8,17 +8,16 @@
 </head>
 <body>
     <h1>Welcome Back</h1>
-    <ul>
-        <% data.forEach(function(d) { %>
-          <li>
-            <strong><%= d.person_nr %></strong> 
-            <strong><%= d.fornavn %></strong>
-            <strong><%= d.etternavn %></strong>
+    
+      <% data.forEach(function(d) { %>
+       <h2>
+          <strong><%= d.fornavn %></strong>
+          <strong><%= d.etternavn %></strong>
+       </h2>
+      <% }); %>
 
-          </li>
-        <% }); %>
-    </ul>
-    <a href="/"></a>
+    <script src="script.js"></script>
+
 
 </body>
 </html>
