@@ -56,8 +56,8 @@ var session;
 app.get('/', function (req, res) {
      session=req.session;
      if(session.userid){ //if already logged in
-        res.render('index.ejs', {
-            userid: session.userid
+        res.render('konto.ejs', {
+            userid: req.session.userid
         });
  
      } 
@@ -85,7 +85,7 @@ app.post('/login', function (req, res) {
             res.status(500).send('Internal Server Error');
         } else if (results.length === 1) {
             session = req.session;
-            session.userid=req.body.person_nr; // set session userid til brukernavn
+            req.session.userid=req.body.person_nr; // set session userid til brukernavn
             res.redirect('/konto');
  
         } else {
@@ -121,7 +121,8 @@ app.get('/konto', function (req, res) {
             console.log(results);     
                           
             res.render('konto.ejs', {
-               data: results
+               data: results,
+               userid: results[0].fornavn
               
                   
           }); // render
@@ -129,6 +130,37 @@ app.get('/konto', function (req, res) {
     });// connect
   }) // app get
  
+
+  app.get('/konto_visning', function (req, res) {
+
+    session = req.session
+
+    person_nr = session.userid
+
+
+    var con = mysql.createConnection({host:"mikkel-mysql.mysql.database.azure.com", user:"mikkel", password:"1drossaP", 
+    database:"spontanlaanbank", port:3306, ssl:{ca:fs.readFileSync("DigiCertGlobalRootCA.crt.pem")}});
+ 
+     con.connect(function(err) {
+         //if (err) throw err;
+         var sql = 'SELECT * FROM konto WHERE eier_person_nr = ? ';
+    
+         con.query(sql, [person_nr], (error, results) => {
+            if (err) throw err;
+            console.log(results);     
+                          
+            res.render('konto_visning.ejs', {
+               data: results,
+               userid: results[0].fornavn
+              
+                  
+          }); // render
+         }); // select
+    });// connect
+  }) // app get
+ 
+
+
 
  
 var server = app.listen(8081, function () {
